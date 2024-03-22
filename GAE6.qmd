@@ -1,6 +1,6 @@
 ---
 title: "GAE6: Pea Aphids: multiple comparisons"
-author: "Your Name Here"
+author: "Jill Dixon"
 format: 
   html:
     embed-resources: true
@@ -153,6 +153,65 @@ ggplot(aphids)+
   theme(
     legend.position = "none"
   )
+
+```
+
+This result is supported by multiple comparisons and further defined by the contrast of uninfected versus infected pea aphids (@tbl-Planned and @tbl-Tukey).
+
+```{r}
+#| label: tbl-Planned
+#| tbl-cap: "Planned Hypothesis Tests"
+
+aphidMeans <- emmeans(aphidMod, "Treatment")
+
+aphidCont <- tidy(contrast(
+  aphidMeans, 
+  method = list(
+    #                             Un-Inj    Un-INF    INF
+    'uninfected vs infected' = c(   -1,       -1,      2 ),
+    'Control vs Sham'        = c(   -1,        1,       0)
+  ),
+  adjust = "none"
+))[,-c(1,3)]
+
+
+aphidCont$p.value <- format.pval(
+  aphidCont$p.value, 
+  digits = 3,
+  eps = 0.001, 
+  na.form = ''
+)
+
+
+kbl(
+  aphidCont, 
+  col.names = c(
+    "Contrast", 
+    "Estimate", 
+    "SE", 
+    "df", 
+    "t", 
+    "p"
+  ),
+  digits = c(0,3,3,0,3,3), 
+  align = "r", 
+  table.attr = 'data-quarto-disable-processing = "true"'
+) |>
+  kable_classic()
+
+```
+
+```{r}
+#| label: tbl-Tukey
+#| tbl-cap: "All pair-wise comparisons of means with the Tukey correction to protect the experiment-wize error rate at 0.05."
+
+
+kbl(
+  pairs(aphidMeans), 
+  digits = 4,
+  table.attr = 'data-quarto-disable-processing= "true"'
+) |>
+kable_classic(full = FALSE)
 
 ```
 
